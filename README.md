@@ -12,6 +12,18 @@ This template should help get you started developing with Vue 3 in Vite.
 
 ![Dashboard screen](docs/screenshots/Dashboard.png)
 
+### Work Orders
+
+![Work Order screen](docs/screenshots/WorkOrder.png)
+
+### Inventory
+
+![Inventory screen](docs/screenshots/Inventory.png)
+
+### Device Monitor
+
+![Device Monitor screen](docs/screenshots/Device.png)
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
