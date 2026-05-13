@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { CircleCheck, Cpu, Refresh, Search, Timer, Warning } from "@element-plus/icons-vue";
+import * as signalr from "@microsoft/signalr";
 import { getDevices } from "@/api/device";
 
 interface Device {
@@ -16,7 +17,7 @@ const devices = ref<Device[]>([]);
 const loading = ref(false);
 const searchKeyword = ref("");
 const lastRefreshAt = ref<Date>();
-let timer: number | undefined;
+// let timer: number | undefined;
 
 const filteredDevices = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase();
@@ -153,16 +154,26 @@ const formatDateTime = (value?: string | Date) => {
   }).format(date);
 };
 
-onMounted(() => {
-  fetchDevices(true);
-  timer = window.setInterval(() => fetchDevices(), 3000);
+onMounted(async () => {
+  const connection = new signalr.HubConnectionBuilder()
+    .withUrl("http://localhost:5001/deviceHub")
+    .withAutomaticReconnect()
+    .build();
+
+  connection.on("ReceiveDeviceUpdate", (data) => {
+    devices.value = data
+  });
+
+  await connection.start();
+  // fetchDevices(true);
+  // timer = window.setInterval(() => fetchDevices(), 3000);
 });
 
-onUnmounted(() => {
-  if (timer) {
-    clearInterval(timer);
-  }
-});
+// onUnmounted(() => {
+//   if (timer) {
+//     clearInterval(timer);
+//   }
+// });
 </script>
 
 <template>
@@ -170,7 +181,7 @@ onUnmounted(() => {
     <div class="page-hero">
       <div>
         <span class="eyebrow">Equipment Telemetry</span>
-        <h2>Device Monitor</h2>
+        <h2>Real-Time Device Monitor</h2>
         <p>Watch equipment status, temperature trends, and live device heartbeat updates.</p>
       </div>
 
@@ -186,7 +197,9 @@ onUnmounted(() => {
     <div class="metric-grid">
       <div class="metric-card">
         <div class="metric-icon blue">
-          <el-icon><Cpu /></el-icon>
+          <el-icon>
+            <Cpu />
+          </el-icon>
         </div>
         <span>Total Devices</span>
         <strong>{{ devices.length }}</strong>
@@ -194,7 +207,9 @@ onUnmounted(() => {
 
       <div class="metric-card">
         <div class="metric-icon green">
-          <el-icon><CircleCheck /></el-icon>
+          <el-icon>
+            <CircleCheck />
+          </el-icon>
         </div>
         <span>Online</span>
         <strong>{{ onlineDevices }}</strong>
@@ -202,7 +217,9 @@ onUnmounted(() => {
 
       <div class="metric-card">
         <div class="metric-icon amber">
-          <el-icon><Warning /></el-icon>
+          <el-icon>
+            <Warning />
+          </el-icon>
         </div>
         <span>Warnings</span>
         <strong>{{ warningDevices }}</strong>
@@ -210,7 +227,9 @@ onUnmounted(() => {
 
       <div class="metric-card">
         <div class="metric-icon violet">
-          <el-icon><Timer /></el-icon>
+          <el-icon>
+            <Timer />
+          </el-icon>
         </div>
         <span>Avg Temp</span>
         <strong>{{ formatTemperature(averageTemperature) }}</strong>
@@ -228,22 +247,11 @@ onUnmounted(() => {
             </p>
           </div>
 
-          <el-input
-            v-model="searchKeyword"
-            class="search-input"
-            clearable
-            :prefix-icon="Search"
-            placeholder="Search device, name, status"
-          />
+          <el-input v-model="searchKeyword" class="search-input" clearable :prefix-icon="Search"
+            placeholder="Search device, name, status" />
         </div>
 
-        <el-table
-          v-loading="loading"
-          :data="filteredDevices"
-          class="device-table"
-          row-key="deviceCode"
-          stripe
-        >
+        <el-table v-loading="loading" :data="filteredDevices" class="device-table" row-key="deviceCode" stripe>
           <el-table-column prop="deviceCode" label="Device Code" min-width="160">
             <template #default="{ row }">
               <strong class="device-code">{{ row.deviceCode }}</strong>
@@ -607,6 +615,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 720px) {
+
   .page-hero,
   .panel-toolbar {
     align-items: stretch;
