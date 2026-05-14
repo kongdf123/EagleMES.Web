@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { Box, Cpu, DataAnalysis, Finished, Tickets } from '@element-plus/icons-vue'
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import { Box, Cpu, DataAnalysis, Finished, Memo, Tickets } from "@element-plus/icons-vue";
 
-const route = useRoute()
+const route = useRoute();
 
-const activeMenu = computed(() => route.path)
+const activeMenu = computed(() => route.path);
 </script>
 
 <template>
   <div class="sidebar">
     <div class="brand">
       <div class="brand-mark">
-        <el-icon><Finished /></el-icon>
+        <el-icon>
+          <Finished />
+        </el-icon>
       </div>
       <div>
         <strong>EagleMES</strong>
@@ -22,33 +24,46 @@ const activeMenu = computed(() => route.path)
 
     <div class="menu-label">Operations</div>
 
-    <el-menu
-      router
-      :default-active="activeMenu"
-      class="nav-menu"
-      background-color="transparent"
-      text-color="#cbd5e1"
-      active-text-color="#ffffff"
-    >
+    <el-menu router :default-active="activeMenu" class="nav-menu" background-color="transparent" text-color="#cbd5e1"
+      active-text-color="#ffffff">
       <el-menu-item index="/dashboard">
-        <el-icon><DataAnalysis /></el-icon>
+        <el-icon>
+          <DataAnalysis />
+        </el-icon>
         <span>Dashboard</span>
       </el-menu-item>
 
       <el-menu-item index="/production/workorders">
-        <el-icon><Tickets /></el-icon>
+        <el-icon>
+          <Tickets />
+        </el-icon>
         <span>Work Orders</span>
       </el-menu-item>
 
       <el-menu-item index="/warehouse/inventory">
-        <el-icon><Box /></el-icon>
+        <el-icon>
+          <Box />
+        </el-icon>
         <span>Inventory</span>
       </el-menu-item>
 
       <el-menu-item index="/devices/monitor">
-        <el-icon><Cpu /></el-icon>
+        <el-icon>
+          <Cpu />
+        </el-icon>
         <span>Devices</span>
       </el-menu-item>
+
+      <el-menu-item-group class="system-menu-group">
+        <template #title>System</template>
+
+        <el-menu-item index="/system/eventlogs">
+          <el-icon>
+            <Memo />
+          </el-icon>
+          <span>Event Logs</span>
+        </el-menu-item>
+      </el-menu-item-group>
     </el-menu>
 
     <div class="sidebar-footer">
@@ -116,6 +131,20 @@ const activeMenu = computed(() => route.path)
 .nav-menu {
   flex: 1;
   border-right: 0;
+}
+
+.system-menu-group {
+  margin-top: 14px;
+}
+
+.system-menu-group :deep(.el-menu-item-group__title) {
+  padding: 0 12px 6px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
 .nav-menu :deep(.el-menu-item) {

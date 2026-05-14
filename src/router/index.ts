@@ -18,19 +18,28 @@ const router = createRouter({
       children: [
         {
           path: "dashboard",
+          name: "dashboard",
           component: () => import("../views/dashboard/DashboardView.vue"),
         },
         {
           path: "production/workorders",
+          name: "work-orders",
           component: () => import("../views/production/WorkOrderView.vue"),
         },
         {
           path: "warehouse/inventory",
+          name: "inventory",
           component: () => import("../views/warehouse/InventoryView.vue"),
         },
         {
           path: "devices/monitor",
+          name: "devices",
           component: () => import("../views/devices/DeviceView.vue"),
+        },
+        {
+          path: "system/eventlogs",
+          name: "event-logs",
+          component: () => import("../views/system/EventLogsView.vue"),
         },
       ],
     },
