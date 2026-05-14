@@ -14,6 +14,7 @@ import {
 
 const route = useRoute();
 
+const role = localStorage.getItem('role')
 const activeMenu = computed(() => route.path);
 </script>
 
@@ -69,7 +70,7 @@ const activeMenu = computed(() => route.path);
         </el-menu-item>
       </el-menu-item-group>
 
-      <el-menu-item-group class="module-menu-group">
+      <el-menu-item-group class="module-menu-group" v-if="role === 'Admin' || role === 'Planner'" index="srm">
         <template #title>SRM</template>
 
         <el-menu-item index="/srm/suppliers">

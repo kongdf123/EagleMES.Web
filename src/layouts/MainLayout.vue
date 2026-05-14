@@ -1,31 +1,81 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { Bell, FullScreen, SwitchButton } from '@element-plus/icons-vue'
-import SidebarMenu from '../components/SidebarMenu.vue'
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Bell, FullScreen, SwitchButton } from "@element-plus/icons-vue";
+import SidebarMenu from "../components/SidebarMenu.vue";
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
-if (!localStorage.getItem('token')) {
-  router.push('/login')
+const username = ref(localStorage.getItem("username") || "");
+const role = ref(localStorage.getItem("role") || "");
+const isFullscreen = ref(false);
+
+if (!localStorage.getItem("token")) {
+  router.push("/login");
 }
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
-    '/dashboard': 'Dashboard',
-    '/production/workorders': 'Work Orders',
-    '/warehouse/inventory': 'Inventory',
-    '/devices/monitor': 'Device Monitor',
-  }
+    "/dashboard": "Dashboard",
+    "/production/workorders": "Work Orders",
+    "/warehouse/inventory": "Inventory",
+    "/srm/suppliers": "Suppliers",
+    "/srm/purchase-orders": "Purchase Orders",
+    "/devices/monitor": "Device Monitor",
+    "/system/eventlogs": "Event Logs",
+  };
 
-  return titles[route.path] || 'Operations'
-})
+  return titles[route.path] || "Operations";
+});
+
+const displayUsername = computed(() => username.value || "User");
+const displayRole = computed(() => role.value || "Operator");
+
+const userInitials = computed(() => {
+  return displayUsername.value
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase() || "U";
+});
 
 const logout = () => {
-  localStorage.removeItem('token')
-  router.push('/login')
-}
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  localStorage.removeItem("role");
+  router.push("/login");
+};
+
+const handleUserCommand = (command: string | number | object) => {
+  if (command === "logout") {
+    logout();
+  }
+};
+
+const toggleFullscreen = async () => {
+  if (!document.fullscreenElement) {
+    await document.documentElement.requestFullscreen?.();
+    return;
+  }
+
+  await document.exitFullscreen?.();
+};
+
+const syncFullscreenState = () => {
+  isFullscreen.value = Boolean(document.fullscreenElement);
+};
+
+onMounted(() => {
+  document.addEventListener("fullscreenchange", syncFullscreenState);
+  syncFullscreenState();
+});
+
+onUnmounted(() => {
+  document.removeEventListener("fullscreenchange", syncFullscreenState);
+});
 </script>
 
 <template>
@@ -48,8 +98,29 @@ const logout = () => {
           </div>
 
           <el-button :icon="Bell" circle aria-label="Notifications" />
-          <el-button :icon="FullScreen" circle aria-label="Fullscreen" />
-          <el-button type="primary" :icon="SwitchButton" @click="logout"> Logout </el-button>
+          <el-button :icon="FullScreen" circle :type="isFullscreen ? 'primary' : 'default'" aria-label="Fullscreen"
+            @click="toggleFullscreen" />
+
+          <el-dropdown trigger="click" @command="handleUserCommand">
+            <button class="user-menu" type="button" aria-label="User account menu">
+              <span class="user-avatar">{{ userInitials }}</span>
+              <span class="user-copy">
+                <strong>{{ displayUsername }}</strong>
+                <!-- <span>{{ displayRole }}</span> -->
+              </span>
+            </button>
+
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item disabled>
+                  Signed in as {{ displayUsername }}
+                </el-dropdown-item>
+                <el-dropdown-item command="logout" divided :icon="SwitchButton">
+                  Logout
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </el-header>
 
@@ -117,6 +188,70 @@ const logout = () => {
   gap: 10px;
 }
 
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(118px, 32vw);
+  min-width: 118px;
+  height: 42px;
+  padding: 0 12px 0 8px;
+  color: inherit;
+  cursor: pointer;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 8px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.user-menu:hover,
+.user-menu:focus-visible {
+  border-color: rgba(37, 99, 235, 0.36);
+  outline: none;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.user-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  color: #ecfeff;
+  font-size: 12px;
+  font-weight: 850;
+  background: linear-gradient(135deg, #2563eb, #0891b2);
+  border-radius: 8px;
+}
+
+.user-copy {
+  min-width: 0;
+  text-align: left;
+}
+
+.user-copy strong,
+.user-copy span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-copy strong {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.user-copy span {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -163,6 +298,11 @@ const logout = () => {
 
   .topbar-actions {
     flex-wrap: wrap;
+  }
+
+  .user-menu {
+    width: min(220px, 100%);
+    min-width: min(220px, 100%);
   }
 
   .content {

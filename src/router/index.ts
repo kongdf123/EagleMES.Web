@@ -64,4 +64,27 @@ const router = createRouter({
   ],
 });
 
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  if (!token && to.path !== "/login") {
+    return next("/login");
+  }
+
+  const roleMap: Record<string, string[]> = {
+    "/inventory": ["Admin", "Warehouse"],
+    "/suppliers": ["Admin", "Planner"],
+    "/purchase-orders": ["Admin", "Planner"],
+  };
+
+  const allowedRoles = roleMap[to.path];
+
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
+    return next("/dashboard");
+  }
+
+  next();
+});
+
 export default router;

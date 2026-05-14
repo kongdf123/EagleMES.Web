@@ -3,7 +3,9 @@
     <section class="login-visual" aria-label="Smart factory overview">
       <div class="brand-row">
         <div class="brand-mark">
-          <el-icon><Finished /></el-icon>
+          <el-icon>
+            <Finished />
+          </el-icon>
         </div>
         <div>
           <strong>EagleMES</strong>
@@ -39,41 +41,18 @@
           <h2>Sign in to your workspace</h2>
         </div>
 
-        <el-form
-          ref="formRef"
-          :model="form"
-          :rules="rules"
-          label-position="top"
-          class="login-form"
-          @keyup.enter="submitForm"
-        >
+        <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="login-form"
+          @keyup.enter="submitForm">
           <el-form-item label="Username" prop="username">
-            <el-input
-              v-model="form.username"
-              :prefix-icon="User"
-              placeholder="Enter username"
-              size="large"
-            />
+            <el-input v-model="form.username" :prefix-icon="User" placeholder="Enter username" size="large" />
           </el-form-item>
 
           <el-form-item label="Password" prop="password">
-            <el-input
-              v-model="form.password"
-              :prefix-icon="Lock"
-              type="password"
-              placeholder="Enter password"
-              show-password
-              size="large"
-            />
+            <el-input v-model="form.password" :prefix-icon="Lock" type="password" placeholder="Enter password"
+              show-password size="large" />
           </el-form-item>
 
-          <el-button
-            type="primary"
-            size="large"
-            class="login-button"
-            :loading="loading"
-            @click="submitForm"
-          >
+          <el-button type="primary" size="large" class="login-button" :loading="loading" @click="submitForm">
             Login
           </el-button>
         </el-form>
@@ -116,6 +95,8 @@ const submitForm = async () => {
     const response = await login(form.value)
 
     localStorage.setItem('token', response.data.token)
+    localStorage.setItem('role', response.data.role)
+    localStorage.setItem('username', response.data.username)
 
     router.push('/dashboard')
   } catch (error) {
