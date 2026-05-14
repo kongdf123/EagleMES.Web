@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import { Box, Cpu, DataAnalysis, Finished, Memo, Tickets } from "@element-plus/icons-vue";
+import {
+  Box,
+  Cpu,
+  DataAnalysis,
+  Finished,
+  Memo,
+  OfficeBuilding,
+  ShoppingCart,
+  Tickets,
+} from "@element-plus/icons-vue";
 
 const route = useRoute();
 
@@ -22,8 +31,6 @@ const activeMenu = computed(() => route.path);
       </div>
     </div>
 
-    <div class="menu-label">Operations</div>
-
     <el-menu router :default-active="activeMenu" class="nav-menu" background-color="transparent" text-color="#cbd5e1"
       active-text-color="#ffffff">
       <el-menu-item index="/dashboard">
@@ -33,28 +40,54 @@ const activeMenu = computed(() => route.path);
         <span>Dashboard</span>
       </el-menu-item>
 
-      <el-menu-item index="/production/workorders">
-        <el-icon>
-          <Tickets />
-        </el-icon>
-        <span>Work Orders</span>
-      </el-menu-item>
+      <el-menu-item-group class="module-menu-group">
+        <template #title>MES</template>
 
-      <el-menu-item index="/warehouse/inventory">
-        <el-icon>
-          <Box />
-        </el-icon>
-        <span>Inventory</span>
-      </el-menu-item>
+        <el-menu-item index="/production/workorders">
+          <el-icon>
+            <Tickets />
+          </el-icon>
+          <span>Work Orders</span>
+        </el-menu-item>
 
-      <el-menu-item index="/devices/monitor">
-        <el-icon>
-          <Cpu />
-        </el-icon>
-        <span>Devices</span>
-      </el-menu-item>
+        <el-menu-item index="/devices/monitor">
+          <el-icon>
+            <Cpu />
+          </el-icon>
+          <span>Devices</span>
+        </el-menu-item>
+      </el-menu-item-group>
 
-      <el-menu-item-group class="system-menu-group">
+      <el-menu-item-group class="module-menu-group">
+        <template #title>WMS</template>
+
+        <el-menu-item index="/warehouse/inventory">
+          <el-icon>
+            <Box />
+          </el-icon>
+          <span>Inventory</span>
+        </el-menu-item>
+      </el-menu-item-group>
+
+      <el-menu-item-group class="module-menu-group">
+        <template #title>SRM</template>
+
+        <el-menu-item index="/srm/suppliers">
+          <el-icon>
+            <OfficeBuilding />
+          </el-icon>
+          <span>Suppliers</span>
+        </el-menu-item>
+
+        <el-menu-item index="/srm/purchase-orders">
+          <el-icon>
+            <ShoppingCart />
+          </el-icon>
+          <span>Purchase Orders</span>
+        </el-menu-item>
+      </el-menu-item-group>
+
+      <el-menu-item-group class="module-menu-group">
         <template #title>System</template>
 
         <el-menu-item index="/system/eventlogs">
@@ -119,26 +152,17 @@ const activeMenu = computed(() => route.path);
   font-weight: 650;
 }
 
-.menu-label {
-  padding: 0 12px 10px;
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
 .nav-menu {
   flex: 1;
   border-right: 0;
 }
 
-.system-menu-group {
-  margin-top: 14px;
+.module-menu-group {
+  margin-top: 16px;
 }
 
-.system-menu-group :deep(.el-menu-item-group__title) {
-  padding: 0 12px 6px;
+.module-menu-group :deep(.el-menu-item-group__title) {
+  padding: 0 12px 6px 10px !important;
   color: #64748b;
   font-size: 11px;
   font-weight: 800;

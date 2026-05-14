@@ -32,6 +32,16 @@ const router = createRouter({
           component: () => import("../views/warehouse/InventoryView.vue"),
         },
         {
+          path: "srm/suppliers",
+          name: "suppliers",
+          component: () => import("../views/srm/SupplierView.vue"),
+        },
+        {
+          path: "srm/purchase-orders",
+          name: "purchase-orders",
+          component: () => import("../views/srm/PurchaseOrderView.vue"),
+        },
+        {
           path: "devices/monitor",
           name: "devices",
           component: () => import("../views/devices/DeviceView.vue"),
