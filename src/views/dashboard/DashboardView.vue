@@ -4,7 +4,6 @@ import { RouterLink } from "vue-router";
 import { ElMessage } from "element-plus";
 import {
   Box,
-  CircleCheck,
   Cpu,
   DataAnalysis,
   Refresh,
@@ -12,6 +11,12 @@ import {
   TrendCharts,
   Warning,
 } from "@element-plus/icons-vue";
+import type { EChartsOption } from "echarts";
+import VChart from "vue-echarts";
+import { LineChart } from "echarts/charts";
+import { GridComponent, LegendComponent, TooltipComponent } from "echarts/components";
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
 import { getDevices } from "@/api/device";
 import { getInventory } from "@/api/inventory";
 import { getWorkOrders } from "@/api/workorder";
@@ -37,6 +42,14 @@ interface Device {
   temperature?: number;
   lastUpdated?: string;
 }
+
+use([
+  CanvasRenderer,
+  LineChart,
+  GridComponent,
+  TooltipComponent,
+  LegendComponent,
+]);
 
 const workOrders = ref<WorkOrder[]>([]);
 const inventory = ref<InventoryItem[]>([]);
@@ -123,6 +136,89 @@ const attentionMaterials = computed(() => {
     .filter((item) => Number(item.quantity || 0) < 700)
     .sort((first, second) => Number(first.quantity || 0) - Number(second.quantity || 0))
     .slice(0, 5);
+});
+
+const productionChartOption = computed<EChartsOption>(() => {
+  const chartOrders = workOrders.value.slice(0, 7).reverse();
+  const hasOrders = chartOrders.length > 0;
+  const labels = hasOrders ? chartOrders.map((order) => order.orderNo) : ["No orders"];
+  const quantities = hasOrders ? chartOrders.map((order) => Number(order.quantity || 0)) : [0];
+
+  return {
+    color: ["#2563eb"],
+    tooltip: {
+      trigger: "axis",
+      valueFormatter: (value) => formatQuantity(Number(value)),
+    },
+    legend: {
+      top: 0,
+      right: 0,
+      itemWidth: 12,
+      itemHeight: 8,
+      textStyle: {
+        color: "#64748b",
+        fontWeight: 700,
+      },
+    },
+    grid: {
+      top: 44,
+      right: 18,
+      bottom: 42,
+      left: 56,
+      containLabel: true,
+    },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: labels,
+      axisLine: {
+        lineStyle: {
+          color: "#cbd5e1",
+        },
+      },
+      axisTick: {
+        show: false,
+      },
+      axisLabel: {
+        color: "#64748b",
+        fontWeight: 700,
+        hideOverlap: true,
+      },
+    },
+    yAxis: {
+      type: "value",
+      minInterval: 1,
+      axisLabel: {
+        color: "#64748b",
+        formatter: (value: number) => formatQuantity(value),
+      },
+      splitLine: {
+        lineStyle: {
+          color: "#e2e8f0",
+          type: "dashed",
+        },
+      },
+    },
+    series: [
+      {
+        name: "Order Quantity",
+        type: "line",
+        smooth: true,
+        symbol: "circle",
+        symbolSize: 8,
+        data: quantities,
+        lineStyle: {
+          width: 3,
+        },
+        areaStyle: {
+          color: "rgba(37, 99, 235, 0.12)",
+        },
+        emphasis: {
+          focus: "series",
+        },
+      },
+    ],
+  };
 });
 
 const loadData = async () => {
@@ -418,6 +514,21 @@ onMounted(loadData);
         </el-table>
       </div>
     </div>
+
+    <div v-loading="loading" class="chart-panel">
+      <div class="panel-toolbar">
+        <div>
+          <h3>Production Quantity Trend</h3>
+          <p>Latest {{ Math.min(workOrders.length, 7) }} work orders by quantity</p>
+        </div>
+
+        <el-icon>
+          <TrendCharts />
+        </el-icon>
+      </div>
+
+      <VChart class="chart" :option="productionChartOption" autoresize />
+    </div>
   </section>
 </template>
 
@@ -564,7 +675,8 @@ onMounted(loadData);
 
 .score-panel,
 .quick-links,
-.table-panel {
+.table-panel,
+.chart-panel {
   overflow: hidden;
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(148, 163, 184, 0.22);
@@ -802,5 +914,11 @@ onMounted(loadData);
   .summary-list {
     grid-template-columns: 1fr;
   }
+}
+
+.chart {
+  width: 100%;
+  height: 360px;
+  padding: 8px 14px 18px;
 }
 </style>
